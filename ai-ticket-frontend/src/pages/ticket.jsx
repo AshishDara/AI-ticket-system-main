@@ -24,7 +24,7 @@ export default function TicketDetailsPage() {
         if (res.ok) {
           setTicket(data.ticket);
         } else {
-          alert(data.message || "Failed to fetch ticket");
+          alert(data.message || "Failedd to fetch ticket");
         }
       } catch (err) {
         console.error(err);

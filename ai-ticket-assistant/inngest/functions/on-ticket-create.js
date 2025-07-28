@@ -1,9 +1,12 @@
+// ai-ticket-assistant/inngest/functions/on-ticket-create.js
+
 import { inngest } from "../client.js";
 import Ticket from "../../models/ticket.js";
 import User from "../../models/user.js";
 import { NonRetriableError } from "inngest";
 import { sendMail } from "../../utils/mailer.js";
 import analyzeTicket from "../../utils/ai.js";
+import mongoose from "mongoose"; // Ensure mongoose is imported for ObjectId if needed for ticket._id
 
 export const onTicketCreated = inngest.createFunction(
   { id: "on-ticket-created", retries: 2 },
@@ -12,76 +15,104 @@ export const onTicketCreated = inngest.createFunction(
     try {
       const { ticketId } = event.data;
 
-      //fetch ticket from DB
+      // STEP 1: Fetch Ticket from DB
       const ticket = await step.run("fetch-ticket", async () => {
-        const ticketObject = await Ticket.findById(ticketId);
+        // Ensure ticketId is a valid ObjectId for Mongoose
+        if (!mongoose.Types.ObjectId.isValid(ticketId)) {
+            throw new NonRetriableError(`Invalid ticket ID: ${ticketId}`);
+        }
+        const ticketObject = await Ticket.findById(ticketId).lean(); // Ensure .lean()
         if (!ticketObject) {
           throw new NonRetriableError("Ticket not found");
         }
         return ticketObject;
       });
 
-      await step.run("update-ticket-status", async () => {
-        await Ticket.findByIdAndUpdate(ticket._id, { status: "TODO" });
-      });
-
+      // STEP 2: AI Processing
       const aiResponse = await step.run("ai-processing", async () => {
         return await analyzeTicket(ticket);
       });
 
-
-      const relatedskills = await step.run("update-ticket-with-ai-data", async () => {
+      // STEP 3: Update Ticket with AI Data
+      // This step returns the `relatedSkills` array for the next step.
+      const relatedSkills = await step.run("update-ticket-with-ai-data", async () => {
         let skills = [];
         if (aiResponse) {
           await Ticket.findByIdAndUpdate(ticket._id, {
-            $set: { 
-              priority: !["low", "medium", "high"].includes(aiResponse.priority)? "medium": aiResponse.priority,  
+            $set: {
+              priority: !["low", "medium", "high"].includes(aiResponse.priority)
+                ? "medium"
+                : aiResponse.priority,
               helpfulNotes: aiResponse.helpfulNotes,
               status: "IN_PROGRESS",
               relatedSkills: aiResponse.relatedSkills,
             }
           });
           skills = aiResponse.relatedSkills;
+        } else {
+          console.warn(`AI analysis failed for ticket ${ticket._id}. Skipping AI-based updates.`);
         }
-        return skills;
+        return skills; // Return skills for the next step
       });
 
-      const moderator = await step.run("assign-moderator", async () => {
-        let user = await User.findOne({
-          role: "moderator",
-          skills: {
-            $elemMatch: {
-              $regex: relatedskills.join("|"),
-              $options: "i",
+      // STEP 4: Assign Moderator
+      // This step returns the assigned User object.
+      const assignedUser = await step.run("assign-moderator", async () => {
+        // Construct regex pattern safely
+        const skillsRegexPattern = relatedSkills.length > 0 ? relatedSkills.join("|") : null;
+
+        let userToAssign = null;
+
+        if (skillsRegexPattern) {
+          // Attempt to find a moderator with matching skills
+          userToAssign = await User.findOne({
+            role: "moderator",
+            skills: {
+              $elemMatch: {
+                $regex: skillsRegexPattern,
+                $options: "i",
+              },
             },
+          }).lean(); // Ensure .lean()
+        }
+
+        if (!userToAssign) {
+          // Fallback: If no skill-matching moderator found, find an admin
+          userToAssign = await User.findOne({
+            role: "admin",
+          }).lean(); // Ensure .lean()
+        }
+
+        // Update the ticket with the assigned user's ID
+        await Ticket.findByIdAndUpdate(ticket._id, {
+          $set: {
+            assignedTo: userToAssign?._id || null,
           },
         });
-        if (!user) {
-          user = await User.findOne({
-            role: "admin",
-          });
-        }
-        await Ticket.findByIdAndUpdate(ticket._id, {
-          assignedTo: user?._id || null,
-        });
-        return user;
+
+        return userToAssign; // Return the assigned user object
       });
 
+      // STEP 5: Send Email Notification
       await step.run("send-email-notification", async () => {
-        if (moderator) {
-          const finalTicket = await Ticket.findById(ticket._id);
+        if (assignedUser) { // Use 'assignedUser' returned from the previous step
+          const finalTicket = await Ticket.findById(ticket._id).lean(); // Ensure .lean()
           await sendMail(
-            moderator.email,
+            assignedUser.email, // Use email from assignedUser
             "Ticket Assigned",
-            `A new ticket is assigned to you ${finalTicket.title}`
+            `A new ticket is assigned to you: ${finalTicket.title}`
           );
+        } else {
+          console.warn(`No user assigned to ticket ${ticket._id}. Skipping email notification.`);
         }
       });
 
-      return { success: true };
+      return { success: true }; // Indicate overall success
     } catch (err) {
-      console.error("❌ Error running the step", err.message);
-      return { success: false };
+      console.error("❌ Error in onTicketCreated function:", err.message);
+      // If a NonRetriableError is thrown from a step, Inngest won't retry.
+      // Otherwise, it will retry based on 'retries' config.
+      return { success: false }; // Indicate overall failure
     }
   }
 );

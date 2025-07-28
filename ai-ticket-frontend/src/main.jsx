@@ -2,7 +2,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-// import App from "./App.jsx"; // Keep this line removed as discussed
+import Navbar from "./components/navbar.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CheckAuth from "./components/check-auth.jsx";
 import AuthRedirector from "./components/AuthRedirector.jsx"; // NEW: Import AuthRedirector
@@ -15,13 +15,14 @@ import Admin from "./pages/admin.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
+    <Navbar /> {/* <<< RENDER NAVBAR HERE */}
       <Routes>
         <Route
           path="/"
-          element={<AuthRedirector />} // NEW: Make AuthRedirector the default entry
+          element={<AuthRedirector />} // This is correct for the initial redirector
         />
         <Route
-          path="/tickets" // Changed from "/" to "/tickets" for the main app content
+          path="/tickets" // This is where the main app content lives
           element={
             <CheckAuth protectedRoute={true}>
               <Tickets />

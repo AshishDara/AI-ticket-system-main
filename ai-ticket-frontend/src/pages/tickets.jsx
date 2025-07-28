@@ -9,17 +9,17 @@ export default function Tickets() {
   const token = localStorage.getItem("token");
 
   const fetchTickets = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/tickets`, {
-        headers: { Authorization: `Bearer ${token}` },
-        method: "GET",
-      });
-      const data = await res.json();
-      setTickets(data.tickets || []);
-    } catch (err) {
-      console.error("Failed to fetch tickets:", err);
-    }
-  };
+  try {
+    const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/tickets`, {
+      headers: { Authorization: `Bearer ${token}` },
+      method: "GET",
+    });
+    const data = await res.json();
+    setTickets(data.tickets || []); // Ensure this is data.tickets
+  } catch (err) {
+    console.error("Failed to fetch tickets:", err);
+  }
+};
 
   useEffect(() => {
     fetchTickets();

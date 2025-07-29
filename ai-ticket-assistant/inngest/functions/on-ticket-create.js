@@ -29,9 +29,7 @@ export const onTicketCreated = inngest.createFunction(
       });
 
       // STEP 2: AI Processing
-      const aiResponse = await step.run("ai-processing", async () => {
-        return await analyzeTicket(ticket);
-      });
+      const aiResponse = await analyzeTicket(ticket);
 
       // STEP 3: Update Ticket with AI Data
       // This step returns the `relatedSkills` array for the next step.
@@ -41,8 +39,8 @@ export const onTicketCreated = inngest.createFunction(
           await Ticket.findByIdAndUpdate(ticket._id, {
             $set: {
               priority: !["low", "medium", "high"].includes(aiResponse.priority)
-                ? "medium"
-                : aiResponse.priority,
+              ? "medium"
+              : aiResponse.priority,
               helpfulNotes: aiResponse.helpfulNotes,
               status: "IN_PROGRESS",
               relatedSkills: aiResponse.relatedSkills,
@@ -57,7 +55,7 @@ export const onTicketCreated = inngest.createFunction(
 
       // STEP 4: Assign Moderator
       // This step returns the assigned User object.
-      const assignedUser = await step.run("assign-moderator", async () => {
+      const assignedModerator = await step.run("assign-moderator", async () => {
         // Construct regex pattern safely
         const skillsRegexPattern = relatedSkills.length > 0 ? relatedSkills.join("|") : null;
 
@@ -95,10 +93,10 @@ export const onTicketCreated = inngest.createFunction(
 
       // STEP 5: Send Email Notification
       await step.run("send-email-notification", async () => {
-        if (assignedUser) { // Use 'assignedUser' returned from the previous step
+        if (assignedModerator) { // Use 'assignedUser' returned from the previous step
           const finalTicket = await Ticket.findById(ticket._id).lean(); // Ensure .lean()
           await sendMail(
-            assignedUser.email, // Use email from assignedUser
+            assignedModerator.email, // Use email from assignedUser
             "Ticket Assigned",
             `A new ticket is assigned to you: ${finalTicket.title}`
           );

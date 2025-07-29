@@ -7,7 +7,7 @@ import ReactMarkdown from "react-markdown";
 export default function TicketDetailsPage() {
   const { id } = useParams();
   const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Keep initial loading state
 
   const token = localStorage.getItem("token");
 
@@ -15,7 +15,13 @@ export default function TicketDetailsPage() {
     let intervalId; // To store the interval ID for cleanup
 
     const fetchTicketAndPoll = async () => {
-      setLoading(true); // Set loading true at start of fetch cycle
+      // We only show a loading spinner if 'ticket' is null (first fetch)
+      // or if it's specifically in a 'TODO' state and we're waiting for processing.
+      // If 'ticket' already has basic data, we display that immediately.
+      if (!ticket || ticket.status === "TODO") {
+        setLoading(true); // Show loading only if we genuinely don't have the ticket yet or it's still TODO
+      }
+
       try {
         const res = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/tickets/${id}`,
@@ -26,23 +32,29 @@ export default function TicketDetailsPage() {
         const data = await res.json();
 
         if (res.ok && data.ticket) {
-          setTicket(data.ticket);
+          setTicket(data.ticket); // Update ticket state with new data
 
           // Stop polling if status is IN_PROGRESS (or other final state)
-          if (data.ticket.status === "IN_PROGRESS" || data.ticket.status === "RESOLVED" || data.ticket.status === "CLOSED") {
+          // This condition now also sets loading to false.
+          if (
+            data.ticket.status === "IN_PROGRESS" ||
+            data.ticket.status === "RESOLVED" ||
+            data.ticket.status === "CLOSED"
+          ) {
             clearInterval(intervalId); // Stop polling
-            setLoading(false); // Set loading false when processing is complete
+            setLoading(false); // Hide loading when processing is complete
           }
         } else {
+          // Handle API errors
           alert(data.message || "Failed to fetch ticket");
           clearInterval(intervalId); // Stop polling on error
-          setLoading(false);
+          setLoading(false); // Hide loading on error
         }
       } catch (err) {
         console.error(err);
         alert("Something went wrong during fetch/poll");
         clearInterval(intervalId); // Stop polling on error
-        setLoading(false);
+        setLoading(false); // Hide loading on error
       }
     };
 
@@ -50,17 +62,24 @@ export default function TicketDetailsPage() {
     fetchTicketAndPoll();
 
     // Start polling every 2 seconds (adjust as needed)
-    intervalId = setInterval(fetchTicketAndPoll, 2000); // Poll every 2 seconds
+    intervalId = setInterval(fetchTicketAndPoll, 2000);
 
     // Cleanup function: Clear interval when component unmounts
     return () => clearInterval(intervalId);
+  }, [id, token, ticket]); // Added 'ticket' to dependencies to re-evaluate loading state based on its content
 
-  }, [id, token]); // Dependencies: re-run if ID or token changes
-
-  if (loading && (!ticket || ticket.status === "TODO")) // Show loading if no ticket or still TODO
+  // --- Conditional Rendering Logic ---
+  // If no ticket data has been fetched yet AND we are still in a loading state, show "Loading..."
+  if (loading && !ticket) {
     return <div className="text-center mt-10">Loading ticket details...</div>;
-  if (!ticket) return <div className="text-center mt-10">Ticket not found</div>;
+  }
+  // If ticket is null after loading (e.g., 404 from backend), show "Ticket not found"
+  if (!ticket) {
+    return <div className="text-center mt-10">Ticket not found</div>;
+  }
 
+  // If we have a ticket, render its details immediately,
+  // the metadata will appear as 'ticket' state updates via polling.
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Ticket Details</h2>
@@ -106,7 +125,6 @@ export default function TicketDetailsPage() {
             {ticket.assignedTo && typeof ticket.assignedTo === 'string' && (
                 <p><strong>Assigned To ID:</strong> {ticket.assignedTo}</p>
             )}
-
 
             {ticket.createdAt && (
               <p className="text-sm text-gray-500 mt-2">

@@ -1,3 +1,5 @@
+// ai-ticket-frontend/src/pages/ticket.jsx
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -10,34 +12,52 @@ export default function TicketDetailsPage() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const fetchTicket = async () => {
+    let intervalId; // To store the interval ID for cleanup
+
+    const fetchTicketAndPoll = async () => {
+      setLoading(true); // Set loading true at start of fetch cycle
       try {
         const res = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/tickets/${id}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         const data = await res.json();
-        if (res.ok) {
+
+        if (res.ok && data.ticket) {
           setTicket(data.ticket);
+
+          // Stop polling if status is IN_PROGRESS (or other final state)
+          if (data.ticket.status === "IN_PROGRESS" || data.ticket.status === "RESOLVED" || data.ticket.status === "CLOSED") {
+            clearInterval(intervalId); // Stop polling
+            setLoading(false); // Set loading false when processing is complete
+          }
         } else {
-          alert(data.message || "Failedd to fetch ticket");
+          alert(data.message || "Failed to fetch ticket");
+          clearInterval(intervalId); // Stop polling on error
+          setLoading(false);
         }
       } catch (err) {
         console.error(err);
-        alert("Something went wrong");
-      } finally {
+        alert("Something went wrong during fetch/poll");
+        clearInterval(intervalId); // Stop polling on error
         setLoading(false);
       }
     };
 
-    fetchTicket();
-  }, [id,token]);
+    // Initial fetch
+    fetchTicketAndPoll();
 
-  if (loading)
+    // Start polling every 2 seconds (adjust as needed)
+    intervalId = setInterval(fetchTicketAndPoll, 2000); // Poll every 2 seconds
+
+    // Cleanup function: Clear interval when component unmounts
+    return () => clearInterval(intervalId);
+
+  }, [id, token]); // Dependencies: re-run if ID or token changes
+
+  if (loading && (!ticket || ticket.status === "TODO")) // Show loading if no ticket or still TODO
     return <div className="text-center mt-10">Loading ticket details...</div>;
   if (!ticket) return <div className="text-center mt-10">Ticket not found</div>;
 
@@ -78,11 +98,15 @@ export default function TicketDetailsPage() {
               </div>
             )}
 
-            {ticket.assignedTo && (
+            {ticket.assignedTo && typeof ticket.assignedTo === 'object' && ticket.assignedTo.email && (
               <p>
-                <strong>Assigned To:</strong> {ticket.assignedTo?.email}
+                <strong>Assigned To:</strong> {ticket.assignedTo.email}
               </p>
             )}
+            {ticket.assignedTo && typeof ticket.assignedTo === 'string' && (
+                <p><strong>Assigned To ID:</strong> {ticket.assignedTo}</p>
+            )}
+
 
             {ticket.createdAt && (
               <p className="text-sm text-gray-500 mt-2">

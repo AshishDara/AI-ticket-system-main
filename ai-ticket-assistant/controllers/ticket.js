@@ -77,7 +77,7 @@ export const getTicket = async (req, res) => {
       ticket = await Ticket.findOne({
         createdBy: user._id,
         _id: req.params.id,
-      }).select("title description status createdAt")
+      }).select("title description status createdAt priority helpfulNotes relatedSkills assignedTo")
         .lean(); // CRITICAL: Ensure .lean() is here
     }
 

@@ -75,6 +75,23 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+        {/* NEW: Demo Credentials Section */}
+      <div className="text-center pb-4 px-4">
+        <p className="text-sm text-gray-400 mb-2">
+          For demonstration purposes, use these accounts:
+        </p>
+        <div className="text-left text-sm bg-base-200 p-3 rounded-md">
+          <p>
+            <strong>Viewer:</strong> `viewer@demo.com` / `demopassword`
+          </p>
+          <p>
+            <strong>Moderator:</strong> `moderator@demo.com` / `demopassword`
+          </p>
+          <p>
+            <strong>Admin:</strong> `admin@demo.com` / `demopassword`
+          </p>
+        </div>
+      </div>
         {/* NEW: Link to Signup Page */}
         <div className="text-center pb-4">
           <p>

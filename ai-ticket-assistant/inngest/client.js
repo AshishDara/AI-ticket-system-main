@@ -6,4 +6,4 @@ console.log("DEBUG: INNGEST_SIGNING_KEY (first 5 chars):", process.env.INNGEST_S
 console.log("DEBUG: INNGEST_BASE_URL:", process.env.INNGEST_BASE_URL || "NOT SET");
 
 
-export const inngest = new Inngest({ name: "ticketing-system", eventKey:"6KcOmOSio5ti99ewXm3irVpmMWIu-oaqFcTsbOHmD-lfkM8iEd2GyU82ok8Lwh2h_HlvkI1B1RdNebnYyD5isQ" });
+export const inngest = new Inngest({ id: "ticketing-system", eventKey:"6KcOmOSio5ti99ewXm3irVpmMWIu-oaqFcTsbOHmD-lfkM8iEd2GyU82ok8Lwh2h_HlvkI1B1RdNebnYyD5isQ" });

@@ -11,7 +11,7 @@ import { onTicketCreated } from "./inngest/functions/on-ticket-create.js";
 import dotenv from "dotenv";
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 const app = express();
 
 app.use(cors());
@@ -32,6 +32,6 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB connected ✅");
-    app.listen(PORT, () => console.log("🚀 Server at http://localhost:3000"));
+    app.listen(PORT, () => console.log("🚀 Server at http://localhost:10000"));
   })
   .catch((err) => console.error("❌ MongoDB error: ", err));

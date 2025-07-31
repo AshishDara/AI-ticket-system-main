@@ -1,4 +1,6 @@
+
 import { Link, useNavigate } from "react-router-dom";
+import { ShieldCheck } from 'lucide-react';
 
 export default function Navbar() {
   const token = localStorage.getItem("token");
@@ -13,14 +15,15 @@ export default function Navbar() {
     localStorage.removeItem("user");
     navigate("/login");
   };
+
   return (
-    <div className="navbar bg-base-200">
+    <div className="navbar bg-base-200 shadow-lg"> 
       <div className="flex-1">
         <Link to="/" className="btn btn-ghost text-xl">
           Ticket AI
         </Link>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-4 items-center"> 
         {!token ? (
           <>
             <Link to="/signup" className="btn btn-sm">
@@ -32,13 +35,14 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <p>Hi, {user?.email}</p>
+            <p className="hidden md:block text-gray-400">Hi, {user?.email}</p> 
             {user && user?.role === "admin" ? (
-              <Link to="/admin" className="btn btn-sm">
-                Admin
+              <Link to="/admin" className="btn btn-md btn-success text-white font-bold"> 
+                <ShieldCheck size={20} /> 
+                Open Admin Panel
               </Link>
             ) : null}
-            <button onClick={logout} className="btn btn-sm">
+            <button onClick={logout} className="btn btn-sm btn-outline btn-primary"> 
               Logout
             </button>
           </>
@@ -47,3 +51,4 @@ export default function Navbar() {
     </div>
   );
 }
+

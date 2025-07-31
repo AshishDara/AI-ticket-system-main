@@ -75,6 +75,7 @@ export const getTicket = async (req, res) => {
         createdBy: user._id,
         _id: req.params.id,
       }).select("title description status createdAt priority helpfulNotes relatedSkills assignedTo")
+        .populate("assignedTo", ["email", "_id"])
         .lean(); 
     }
 

@@ -63,31 +63,31 @@ export default function Tickets() {
     }
   };
 
-  
-  let ticketsHeading = "All Tickets"; 
+  let ticketsHeading = "All Tickets";
   if (user) {
     if (user.role === "user") {
       ticketsHeading = "Tickets Created by You";
     } else if (user.role === "moderator") {
       ticketsHeading = "Tickets Assigned to You";
     }
-    
   }
-
 
   return (
     <div className="p-4 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Create Ticket</h2>
-      <form onSubmit={handleSubmit} className="space-y-3 mb-8">
-        <input name="title" value={form.title} onChange={handleChange} placeholder="Ticket Title" className="input input-bordered w-full" required />
-        <textarea name="description" value={form.description} onChange={handleChange} placeholder="Ticket Description" className="textarea textarea-bordered w-full" required></textarea>
-        <button className="btn btn-primary" type="submit" disabled={loading}>
-          {loading ? "Submitting..." : "Submit Ticket"}
-        </button>
-      </form>
+      {user && user.role === "user" ? (
+        <>
+          <h2 className="text-2xl font-bold mb-4">Create Ticket</h2>
+          <form onSubmit={handleSubmit} className="space-y-3 mb-8">
+            <input name="title" value={form.title} onChange={handleChange} placeholder="Ticket Title" className="input input-bordered w-full" required />
+            <textarea name="description" value={form.description} onChange={handleChange} placeholder="Ticket Description" className="textarea textarea-bordered w-full" required></textarea>
+            <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? "Submitting..." : "Submit Ticket"}
+            </button>
+          </form>
+        </>
+      ) : null}
 
-      <h2 className="text-xl font-semibold mb-2">{ticketsHeading}</h2> 
-
+      <h2 className="text-xl font-semibold mb-2">{ticketsHeading}</h2>
       <div className="space-y-3">
         {tickets.map((ticket) => (
           <Link

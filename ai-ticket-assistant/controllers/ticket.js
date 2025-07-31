@@ -39,26 +39,24 @@ export const createTicket = async (req, res) => {
 export const getTickets = async (req, res) => {
   try {
     const user = req.user;
-    let tickets = [];
-    if (user.role !== "user") {
-      tickets = await Ticket.find({})
-        .populate("assignedTo", ["email", "_id"])
-        .sort({ createdAt: -1 })
-        .lean(); // CRITICAL: Ensure .lean() is here
+    let query = {};
+
+    if (user.role === "admin") {
+      query = {};
+    } else if (user.role === "moderator") {
+      query = { assignedTo: user._id };
     } else {
-      tickets = await Ticket.find({ createdBy: user._id })
-        .select("title description status createdAt")
-        .sort({ createdAt: -1 })
-        .lean(); // CRITICAL: Ensure .lean() is here
+      query = { createdBy: user._id };
     }
 
-    console.log("Tickets being sent (first 2):", JSON.stringify(tickets.slice(0, 2), null, 2));
+    const tickets = await Ticket.find(query)
+      .select("title description status createdAt")
+      .sort({ createdAt: -1 })
+      .lean();
 
     return res.status(200).json({ tickets });
   } catch (error) {
-    console.error("❌ Error fetching tickets (getTickets):", error.message);
-    
-    console.error("Full error details (getTickets):", error);
+    console.error("Error fetching tickets for role:", user.role, error.message);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

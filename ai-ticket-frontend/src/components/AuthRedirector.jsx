@@ -1,4 +1,3 @@
-// ai-ticket-system-main/ai-ticket-frontend/src/components/AuthRedirector.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,7 +10,7 @@ export default function AuthRedirector() {
 
     if (token) {
       // If token exists, user is authenticated, redirect to main app content
-      navigate("/tickets"); // FIX: Ensure this points to your main content route
+      navigate("/tickets"); 
     } else {
       // If no token, user is not authenticated, redirect to signup
       navigate("/signup");

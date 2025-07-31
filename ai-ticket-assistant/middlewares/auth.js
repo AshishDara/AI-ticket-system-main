@@ -12,7 +12,7 @@ export const authenticate = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    console.error("❌ JWT verification failed:", error.message); // Added logging
+    console.error("❌ JWT verification failed:", error.message);
     res.status(401).json({ error: "Invalid token" });
   }
 };

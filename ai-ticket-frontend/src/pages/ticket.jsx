@@ -1,4 +1,3 @@
-// ai-ticket-frontend/src/pages/ticket.jsx
 
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -7,21 +6,16 @@ import ReactMarkdown from "react-markdown";
 export default function TicketDetailsPage() {
   const { id } = useParams();
   const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true); // Keep initial loading state
+  const [loading, setLoading] = useState(true); 
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    let intervalId; // To store the interval ID for cleanup
-
+    let intervalId; 
     const fetchTicketAndPoll = async () => {
-      // We only show a loading spinner if 'ticket' is null (first fetch)
-      // or if it's specifically in a 'TODO' state and we're waiting for processing.
-      // If 'ticket' already has basic data, we display that immediately.
       if (!ticket || ticket.status === "TODO") {
-        setLoading(true); // Show loading only if we genuinely don't have the ticket yet or it's still TODO
+        setLoading(true); 
       }
-
       try {
         const res = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/tickets/${id}`,
@@ -32,10 +26,7 @@ export default function TicketDetailsPage() {
         const data = await res.json();
 
         if (res.ok && data.ticket) {
-          setTicket(data.ticket); // Update ticket state with new data
-
-          // Stop polling if status is IN_PROGRESS (or other final state)
-          // This condition now also sets loading to false.
+          setTicket(data.ticket); 
           if (
             data.ticket.status === "IN_PROGRESS" ||
             data.ticket.status === "RESOLVED" ||
@@ -45,7 +36,6 @@ export default function TicketDetailsPage() {
             setLoading(false); // Hide loading when processing is complete
           }
         } else {
-          // Handle API errors
           alert(data.message || "Failed to fetch ticket");
           clearInterval(intervalId); // Stop polling on error
           setLoading(false); // Hide loading on error
@@ -57,18 +47,13 @@ export default function TicketDetailsPage() {
         setLoading(false); // Hide loading on error
       }
     };
-
     // Initial fetch
     fetchTicketAndPoll();
-
     // Start polling every 2 seconds (adjust as needed)
     intervalId = setInterval(fetchTicketAndPoll, 2000);
-
     // Cleanup function: Clear interval when component unmounts
     return () => clearInterval(intervalId);
-  }, [id, token, ticket]); // Added 'ticket' to dependencies to re-evaluate loading state based on its content
-
-  // --- Conditional Rendering Logic ---
+  }, [id, token, ticket]); 
   // If no ticket data has been fetched yet AND we are still in a loading state, show "Loading..."
   if (loading && !ticket) {
     return <div className="text-center mt-10">Loading ticket details...</div>;
@@ -87,8 +72,6 @@ export default function TicketDetailsPage() {
       <div className="card bg-gray-800 shadow p-4 space-y-4">
         <h3 className="text-xl font-semibold">{ticket.title}</h3>
         <p>{ticket.description}</p>
-
-        {/* Conditionally render extended details */}
         {ticket.status && (
           <>
             <div className="divider">Metadata</div>

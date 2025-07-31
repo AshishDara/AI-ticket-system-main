@@ -1,11 +1,11 @@
-// ai-ticket-frontend/src/main.jsx
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import Navbar from "./components/navbar.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CheckAuth from "./components/check-auth.jsx";
-import AuthRedirector from "./components/AuthRedirector.jsx"; // NEW: Import AuthRedirector
+import AuthRedirector from "./components/AuthRedirector.jsx"; 
 import Tickets from "./pages/tickets.jsx";
 import TicketDetailsPage from "./pages/ticket.jsx";
 import Login from "./pages/login.jsx";
@@ -15,14 +15,14 @@ import Admin from "./pages/admin.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-    <Navbar /> {/* <<< RENDER NAVBAR HERE */}
+    <Navbar />
       <Routes>
         <Route
           path="/"
-          element={<AuthRedirector />} // This is correct for the initial redirector
+          element={<AuthRedirector />} 
         />
         <Route
-          path="/tickets" // This is where the main app content lives
+          path="/tickets" 
           element={
             <CheckAuth protectedRoute={true}>
               <Tickets />

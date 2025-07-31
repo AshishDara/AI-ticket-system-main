@@ -75,7 +75,6 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
-        {/* NEW: Demo Credentials Section */}
       <div className="text-center pb-4 px-4">
         <p className="text-sm text-gray-400 mb-2">
           For demonstration purposes, use these accounts:
@@ -92,7 +91,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-        {/* NEW: Link to Signup Page */}
         <div className="text-center pb-4">
           <p>
             Don't have an account?{" "}

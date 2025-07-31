@@ -18,11 +18,10 @@ export const signup = async (req, res) => {
       { _id: user._id, role: user.role },
       process.env.JWT_SECRET
     );
-
     // Ensure user object is plain JS object
     res.json({ user: user.toObject(), token });
   } catch (error) {
-    console.error("❌ Signup failed:", error.message); // Added console.error
+    console.error("❌ Signup failed:", error.message);
     res.status(500).json({ error: "Signup failed", details: error.message });
   }
 };
@@ -48,24 +47,24 @@ export const login = async (req, res) => {
     // Ensure user object is plain JS object
     res.json({ user: user.toObject(), token });
   } catch (error) {
-    console.error("❌ Login failed:", error.message); // Added console.error
+    console.error("❌ Login failed:", error.message); 
     res.status(500).json({ error: "Login failed", details: error.message });
   }
 };
 
 export const logout = async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1]; // Use optional chaining
+    const token = req.headers.authorization?.split(" ")[1]; 
     if (!token) return res.status(401).json({ error: "Unauthorized" });
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
-        console.error("❌ Logout - Invalid token:", err.message); // Added console.error
+        console.error("❌ Logout - Invalid token:", err.message); 
         return res.status(401).json({ error: "Unauthorized" });
       }
     });
     res.json({ message: "Logout successfully" });
   } catch (error) {
-    console.error("❌ Logout failed:", error.message); // Added console.error
+    console.error("❌ Logout failed:", error.message); 
     res.status(500).json({ error: "Logout failed", details: error.message });
   }
 };
@@ -85,7 +84,7 @@ export const updateUser = async (req, res) => {
     );
     return res.json({ message: "User updated successfully" });
   } catch (error) {
-    console.error("❌ User update failed:", error.message); // Added console.error
+    console.error("❌ User update failed:", error.message); 
     res.status(500).json({ error: "Update failed", details: error.message });
   }
 };
@@ -97,7 +96,7 @@ export const getUsers = async (req, res) => {
     }
 
     // Ensure users are plain JS objects
-    const users = await User.find().select("-password").lean(); // Added .lean()
+    const users = await User.find().select("-password").lean(); 
     return res.json(users);
   } catch (error) {
     console.error("❌ Error fetching users for admin panel:", error.message);

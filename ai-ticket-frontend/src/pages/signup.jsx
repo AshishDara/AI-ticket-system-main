@@ -78,7 +78,6 @@ export default function SignupPage() {
             </button>
           </div>
         </form>
-        {/* NEW: Demo Message Section */}
         <div className="text-center pb-4 px-4">
           <p className="text-sm text-gray-400 mb-2">
             Just here to demo the app?{" "}
@@ -87,7 +86,6 @@ export default function SignupPage() {
             </Link>
           </p>
         </div>
-        {/* NEW: Link to Login Page */}
         <div className="text-center pb-4">
           <p>
             Already have an account?{" "}

@@ -8,6 +8,10 @@ export default function Tickets() {
   const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
+  let user = localStorage.getItem("user");
+  if (user) {
+    user = JSON.parse(user);
+  }
 
   const fetchTickets = async () => {
     try {
@@ -59,6 +63,18 @@ export default function Tickets() {
     }
   };
 
+  
+  let ticketsHeading = "All Tickets"; 
+  if (user) {
+    if (user.role === "user") {
+      ticketsHeading = "Tickets Created by You";
+    } else if (user.role === "moderator") {
+      ticketsHeading = "Tickets Assigned to You";
+    }
+    
+  }
+
+
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Create Ticket</h2>
@@ -70,29 +86,29 @@ export default function Tickets() {
         </button>
       </form>
 
-      <h2 className="text-xl font-semibold mb-2">All Tickets</h2>
+      <h2 className="text-xl font-semibold mb-2">{ticketsHeading}</h2> 
+
       <div className="space-y-3">
         {tickets.map((ticket) => (
           <Link
             key={ticket._id}
-            className="card shadow-md p-4 bg-gray-800 flex flex-row items-center justify-between hover:bg-gray-700 transition-colors duration-200" 
+            className="card shadow-md p-4 bg-gray-800 flex flex-row items-center justify-between hover:bg-gray-700 transition-colors duration-200"
             to={`/tickets/${ticket._id}`}
           >
-            <div className="flex-1"> 
+            <div className="flex-1">
               <h3 className="font-bold text-lg">{ticket.title}</h3>
               <p className="text-sm">{ticket.description}</p>
               <p className="text-sm text-gray-500">
                 Created At: {new Date(ticket.createdAt).toLocaleString()}
               </p>
             </div>
-            
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
               stroke="currentColor"
-              className="w-6 h-6 text-gray-400 ml-4" 
+              className="w-6 h-6 text-gray-400 ml-4"
             >
               <path
                 strokeLinecap="round"

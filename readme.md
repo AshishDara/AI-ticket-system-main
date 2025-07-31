@@ -43,7 +43,7 @@ The application is built using a modern full-stack JavaScript ecosystem.
 
 You can explore the live, deployed application and its features using the pre-configured demo credentials.
 
-* **Frontend URL**: [https://ai-ticket-frontend-ashishdara.vercel.app](https://www.google.com/search?q=https://ai-ticket-frontend-ashishdara.vercel.app) (Replace with your actual Vercel URL)
+* **Frontend URL**: [https://ai-ticket-frontend-ashishdara.vercel.app](ai-ticket-system-frontend.vercel.app)
 * **Demo Credentials**:
     * **Admin**: `admin@demo.com` / `demopassword`
     * **Moderator**: `moderator@demo.com` / `demopassword`
@@ -67,7 +67,7 @@ You can explore the live, deployed application and its features using the pre-co
 
 1.  **Clone the Repository**:
     ```bash
-    git clone [https://github.com/AshishDara/AI-ticket-system-main.git](https://github.com/AshishDara/AI-ticket-system-main.git)
+    git clone [https://github.com/AshishDara/AI-ticket-system-main.git](https://github.com/AshishDara/AI-ticket-system-main)
     cd AI-ticket-system-main
     ```
 

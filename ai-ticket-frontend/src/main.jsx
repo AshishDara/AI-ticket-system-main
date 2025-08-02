@@ -2,27 +2,27 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import Navbar from "./components/navbar.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CheckAuth from "./components/check-auth.jsx";
-import AuthRedirector from "./components/AuthRedirector.jsx"; 
+import AuthRedirector from "./components/AuthRedirector.jsx";
+import Navbar from "./components/navbar.jsx";
 import Tickets from "./pages/tickets.jsx";
 import TicketDetailsPage from "./pages/ticket.jsx";
 import Login from "./pages/login.jsx";
 import Signup from "./pages/signup.jsx";
 import Admin from "./pages/admin.jsx";
+import { ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-    <Navbar />
+      <Navbar />
+
       <Routes>
+        <Route path="/" element={<AuthRedirector />} />
         <Route
-          path="/"
-          element={<AuthRedirector />} 
-        />
-        <Route
-          path="/tickets" 
+          path="/tickets"
           element={
             <CheckAuth protectedRoute={true}>
               <Tickets />
@@ -63,5 +63,6 @@ createRoot(document.getElementById("root")).render(
         />
       </Routes>
     </BrowserRouter>
+    <ToastContainer position="bottom-right" theme="dark" />
   </StrictMode>
 );

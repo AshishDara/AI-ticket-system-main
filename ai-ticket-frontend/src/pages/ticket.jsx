@@ -1,21 +1,26 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react"; 
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import { toast } from "react-toastify"; 
 
 export default function TicketDetailsPage() {
   const { id } = useParams();
   const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(true); 
-
+  const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
+  const prevStatus = useRef(null);
+
   useEffect(() => {
-    let intervalId; 
+    let intervalId;
+
     const fetchTicketAndPoll = async () => {
-      if (!ticket || ticket.status === "TODO") {
-        setLoading(true); 
+      
+      if (!ticket) {
+        setLoading(true);
       }
+
       try {
         const res = await fetch(
           `${import.meta.env.VITE_SERVER_URL}/tickets/${id}`,
@@ -26,49 +31,57 @@ export default function TicketDetailsPage() {
         const data = await res.json();
 
         if (res.ok && data.ticket) {
-          setTicket(data.ticket); 
+          setTicket(data.ticket);
+          
           if (
             data.ticket.status === "IN_PROGRESS" ||
             data.ticket.status === "RESOLVED" ||
             data.ticket.status === "CLOSED"
           ) {
-            clearInterval(intervalId); // Stop polling
-            setLoading(false); // Hide loading when processing is complete
+            clearInterval(intervalId);
+            setLoading(false);
           }
         } else {
-          alert(data.message || "Failed to fetch ticket");
-          clearInterval(intervalId); // Stop polling on error
-          setLoading(false); // Hide loading on error
+          toast.error(data.message || "Failed to fetch ticket");
+          clearInterval(intervalId);
+          setLoading(false);
         }
       } catch (err) {
+        toast.error("Something went wrong during fetch/poll");
         console.error(err);
-        alert("Something went wrong during fetch/poll");
-        clearInterval(intervalId); // Stop polling on error
-        setLoading(false); // Hide loading on error
+        clearInterval(intervalId);
+        setLoading(false);
       }
     };
-    // Initial fetch
+
+    
     fetchTicketAndPoll();
-    // Start polling every 2 seconds (adjust as needed)
+
     intervalId = setInterval(fetchTicketAndPoll, 2000);
-    // Cleanup function: Clear interval when component unmounts
+
+    
     return () => clearInterval(intervalId);
-  }, [id, token, ticket]); 
-  // If no ticket data has been fetched yet AND we are still in a loading state, show "Loading..."
+  }, [id, token, ticket]);
+ 
+  useEffect(() => {
+    if (ticket && prevStatus.current === "TODO" && ticket.status === "IN_PROGRESS") {
+        toast.success(`AI processing completed! The ticket has been assigned to a moderator.`);
+    }
+    
+    prevStatus.current = ticket?.status;
+  }, [ticket]);
+
   if (loading && !ticket) {
     return <div className="text-center mt-10">Loading ticket details...</div>;
   }
-  // If ticket is null after loading (e.g., 404 from backend), show "Ticket not found"
   if (!ticket) {
     return <div className="text-center mt-10">Ticket not found</div>;
   }
 
-  // If we have a ticket, render its details immediately,
-  // the metadata will appear as 'ticket' state updates via polling.
+  
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Ticket Details</h2>
-
       <div className="card bg-gray-800 shadow p-4 space-y-4">
         <h3 className="text-xl font-semibold">{ticket.title}</h3>
         <p>{ticket.description}</p>
@@ -83,14 +96,12 @@ export default function TicketDetailsPage() {
                 <strong>Priority:</strong> {ticket.priority}
               </p>
             )}
-
             {ticket.relatedSkills?.length > 0 && (
               <p>
                 <strong>Related Skills:</strong>{" "}
                 {ticket.relatedSkills.join(", ")}
               </p>
             )}
-
             {ticket.helpfulNotes && (
               <div>
                 <strong>Helpful Notes:</strong>
@@ -99,7 +110,6 @@ export default function TicketDetailsPage() {
                 </div>
               </div>
             )}
-
             {ticket.assignedTo && typeof ticket.assignedTo === 'object' && ticket.assignedTo.email && (
               <p>
                 <strong>Assigned To:</strong> {ticket.assignedTo.email}
@@ -108,7 +118,6 @@ export default function TicketDetailsPage() {
             {ticket.assignedTo && typeof ticket.assignedTo === 'string' && (
                 <p><strong>Assigned To ID:</strong> {ticket.assignedTo}</p>
             )}
-
             {ticket.createdAt && (
               <p className="text-sm text-gray-500 mt-2">
                 Created At: {new Date(ticket.createdAt).toLocaleString()}

@@ -1,5 +1,7 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify"; 
 
 export default function SignupPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -18,9 +20,7 @@ export default function SignupPage() {
         `${import.meta.env.VITE_SERVER_URL}/auth/signup`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         }
       );
@@ -30,12 +30,13 @@ export default function SignupPage() {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        toast.success(`Signup successful! A welcome email has been sent.`); 
         navigate("/");
       } else {
-        alert(data.message || "Signup failed");
+        toast.error(data.message || "Signup failed"); 
       }
     } catch (err) {
-      alert("Something went wrong");
+      toast.error("Something went wrong"); 
       console.error(err);
     } finally {
       setLoading(false);
@@ -47,33 +48,10 @@ export default function SignupPage() {
       <div className="card w-full max-w-sm shadow-xl bg-base-100">
         <form onSubmit={handleSignup} className="card-body">
           <h2 className="card-title justify-center">Sign Up</h2>
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="input input-bordered"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="input input-bordered"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-
+          <input type="email" name="email" placeholder="Email" className="input input-bordered" value={form.email} onChange={handleChange} required />
+          <input type="password" name="password" placeholder="Password" className="input input-bordered" value={form.password} onChange={handleChange} required />
           <div className="form-control mt-4">
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={loading}
-            >
+            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
               {loading ? "Signing up..." : "Sign Up"}
             </button>
           </div>

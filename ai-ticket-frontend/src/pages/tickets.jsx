@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify"; 
 
 export default function Tickets() {
   const [form, setForm] = useState({ title: "", description: "" });
@@ -51,12 +52,13 @@ export default function Tickets() {
 
       if (res.ok) {
         setForm({ title: "", description: "" });
+        toast.success(`Ticket created: AI processing has started!`); 
         fetchTickets();
       } else {
-        alert(data.message || "Ticket creation failed");
+        toast.error(data.message || "Ticket creation failed"); 
       }
     } catch (err) {
-      alert("Error creating ticket");
+      toast.error("Error creating ticket"); 
       console.error(err);
     } finally {
       setLoading(false);

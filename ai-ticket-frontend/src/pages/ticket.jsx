@@ -1,8 +1,7 @@
-
-import { useEffect, useState, useRef } from "react"; 
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
 
 export default function TicketDetailsPage() {
   const { id } = useParams();
@@ -10,13 +9,13 @@ export default function TicketDetailsPage() {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
+  // Use a ref to track the previous status, preventing notifications on every poll
   const prevStatus = useRef(null);
 
   useEffect(() => {
     let intervalId;
 
     const fetchTicketAndPoll = async () => {
-      
       if (!ticket) {
         setLoading(true);
       }
@@ -32,7 +31,6 @@ export default function TicketDetailsPage() {
 
         if (res.ok && data.ticket) {
           setTicket(data.ticket);
-          
           if (
             data.ticket.status === "IN_PROGRESS" ||
             data.ticket.status === "RESOLVED" ||
@@ -54,20 +52,15 @@ export default function TicketDetailsPage() {
       }
     };
 
-    
     fetchTicketAndPoll();
-
     intervalId = setInterval(fetchTicketAndPoll, 2000);
-
-    
     return () => clearInterval(intervalId);
   }, [id, token, ticket]);
- 
+
   useEffect(() => {
     if (ticket && prevStatus.current === "TODO" && ticket.status === "IN_PROGRESS") {
         toast.success(`AI processing completed! The ticket has been assigned to a moderator.`);
     }
-    
     prevStatus.current = ticket?.status;
   }, [ticket]);
 
@@ -78,7 +71,6 @@ export default function TicketDetailsPage() {
     return <div className="text-center mt-10">Ticket not found</div>;
   }
 
-  
   return (
     <div className="max-w-3xl mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Ticket Details</h2>

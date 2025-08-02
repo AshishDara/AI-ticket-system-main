@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -27,12 +28,13 @@ export default function LoginPage() {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        toast.success(`Login successful!`);
         navigate("/");
       } else {
-        alert(data.message || "Login failed");
+        toast.error(data.message || "Login failed");
       }
     } catch (err) {
-      alert("Something went wrong");
+      toast.error("Something went wrong");
       console.error(err);
     } finally {
       setLoading(false);
@@ -44,53 +46,30 @@ export default function LoginPage() {
       <div className="card w-full max-w-sm shadow-xl bg-base-100">
         <form onSubmit={handleLogin} className="card-body">
           <h2 className="card-title justify-center">Login</h2>
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="input input-bordered"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="input input-bordered"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-
+          <input type="email" name="email" placeholder="Email" className="input input-bordered" value={form.email} onChange={handleChange} required />
+          <input type="password" name="password" placeholder="Password" className="input input-bordered" value={form.password} onChange={handleChange} required />
           <div className="form-control mt-4">
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={loading}
-            >
+            <button type="submit" className="btn btn-primary w-full" disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </button>
           </div>
         </form>
-      <div className="text-center pb-4 px-4">
-        <p className="text-sm text-gray-400 mb-2">
-          For demonstration purposes, use these accounts:
-        </p>
-        <div className="text-left text-sm bg-base-200 p-3 rounded-md">
-          <p>
-            <strong>Viewer:</strong> `viewer@demo.com` / `demopassword`
+        <div className="text-center pb-4 px-4">
+          <p className="text-sm text-gray-400 mb-2">
+            For demonstration purposes, use these accounts:
           </p>
-          <p>
-            <strong>Moderator:</strong> `moderator@demo.com` / `demopassword`
-          </p>
-          <p>
-            <strong>Admin:</strong> `admin@demo.com` / `demopassword`
-          </p>
+          <div className="text-left text-sm bg-base-200 p-3 rounded-md">
+            <p>
+              <strong>Viewer:</strong> `viewer@demo.com` / `demopassword`
+            </p>
+            <p>
+              <strong>Moderator:</strong> `moderator@demo.com` / `demopassword`
+            </p>
+            <p>
+              <strong>Admin:</strong> `admin@demo.com` / `demopassword`
+            </p>
+          </div>
         </div>
-      </div>
         <div className="text-center pb-4">
           <p>
             Don't have an account?{" "}

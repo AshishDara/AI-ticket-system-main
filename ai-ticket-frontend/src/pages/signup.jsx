@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
 
 export default function SignupPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -30,13 +29,13 @@ export default function SignupPage() {
       if (res.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        toast.success(`Signup successful! A welcome email has been sent.`); 
+        toast.success(`Signup successful! A welcome email has been sent.`);
         navigate("/");
       } else {
-        toast.error(data.message || "Signup failed"); 
+        toast.error(data.message || "Signup failed");
       }
     } catch (err) {
-      toast.error("Something went wrong"); 
+      toast.error("Something went wrong");
       console.error(err);
     } finally {
       setLoading(false);

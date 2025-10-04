@@ -52,7 +52,7 @@ export default function Tickets() {
 
       if (res.ok) {
         setForm({ title: "", description: "" });
-        toast.success(`Ticket created: AI processing has started!`);
+        toast.success(`Ticket created: AI processing has started!, Wait a moment and refresh the ticket details page to see AI analysis results.`);
         fetchTickets();
       } else {
         toast.error(data.message || "Ticket creation failed");
